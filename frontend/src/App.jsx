@@ -3,6 +3,8 @@ import { io } from 'socket.io-client'
 import JoinScreen from './components/JoinScreen'
 import LobbyScreen from './components/LobbyScreen'
 import ChatScreen from './components/ChatScreen'
+import VotingScreen from './components/VotingScreen'
+import ResultScreen from './components/ResultScreen'
 
 const socket = io('http://localhost:5000')
 
@@ -13,6 +15,7 @@ function App() {
   const [playerName, setPlayerName] = useState('')
   const [joinError, setJoinError] = useState('')
   const [backendStatus, setBackendStatus] = useState('Checking backend...')
+  const [lastResult, setLastResult] = useState(null)
 
   useEffect(() => {
     socket.on('connect', () => setBackendStatus('Connected'))
@@ -23,10 +26,15 @@ function App() {
       setPlayers(data.players)
     })
 
+    socket.on('game_result', (resultData) => {
+      setLastResult(resultData)
+    })
+
     return () => {
       socket.off('connect')
       socket.off('disconnect')
       socket.off('game_update')
+      socket.off('game_result')
     }
   }, [])
 
@@ -50,37 +58,40 @@ function App() {
     })
   }
 
-  // Choose layout based on state so ChatScreen can have more space
   const isChat = gameState === 'CHAT';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-slate-100 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-slate-100 p-4 font-sans">
       {/* Background decoration */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 blur-[120px] rounded-full mix-blend-screen"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-pink-900/10 blur-[120px] rounded-full mix-blend-screen"></div>
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 blur-[150px] rounded-full mix-blend-screen transition-all duration-1000"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-rose-900/10 blur-[150px] rounded-full mix-blend-screen transition-all duration-1000"></div>
+        {gameState === 'VOTING' && <div className="absolute inset-0 bg-rose-950/20 backdrop-blur-[1px] transition-all duration-1000"></div>}
       </div>
 
-      <div className="relative z-10 w-full max-w-lg mb-4 text-center">
-        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase border ${backendStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse'}`}>
-          <div className={`w-2 h-2 rounded-full ${backendStatus === 'Connected' ? 'bg-emerald-400' : 'bg-amber-400'}`}></div>
+      <div className="relative z-10 w-full max-w-lg mb-6 text-center">
+        <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black tracking-[0.2em] uppercase border ${backendStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(52,211,153,0.1)]' : 'bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse'}`}>
+          <div className={`w-2 h-2 rounded-full shadow-sm ${backendStatus === 'Connected' ? 'bg-emerald-400 shadow-emerald-400/50' : 'bg-amber-400'}`}></div>
           {backendStatus}
         </div>
       </div>
 
-      <div className={`relative z-10 w-full transition-all duration-500 ${isChat ? 'max-w-xl p-0' : 'max-w-md px-8 py-10'} bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden`}>
+      <div className={`relative z-10 w-full transition-all duration-500 ${isChat ? 'max-w-xl p-0 shadow-[0_0_40px_rgba(0,0,0,0.5)]' : 'max-w-md px-8 py-10 shadow-2xl'} bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/50 overflow-hidden`}>
         {!joined ? (
           <JoinScreen onJoin={handleJoin} joinError={joinError} />
         ) : gameState === 'LOBBY' ? (
           <LobbyScreen players={players} onStartGame={handleStartGame} />
         ) : gameState === 'CHAT' ? (
           <ChatScreen socket={socket} playerName={playerName} />
+        ) : gameState === 'VOTING' ? (
+          <VotingScreen socket={socket} players={players} playerName={playerName} />
+        ) : gameState === 'RESULT' ? (
+          <ResultScreen result={lastResult} />
         ) : (
           <div className="text-center p-8">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-4">
-              Phase: {gameState}
+            <h2 className="text-3xl font-bold text-slate-300 animate-pulse">
+              Loading...
             </h2>
-            <p className="text-slate-400">Loading next phase...</p>
           </div>
         )}
       </div>

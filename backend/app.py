@@ -120,5 +120,32 @@ def handle_message(data):
     if mentioned or random.random() < 0.3:
         socketio.start_background_task(ai_respond_task)
 
+@socketio.on('submit_vote')
+def handle_vote(data):
+    target_name = data.get('target')
+    if not target_name:
+        return {'success': False, 'message': 'Target required.'}
+        
+    success, msg = game_manager.submit_vote(request.sid, target_name)
+    if success:
+        if msg == "All_Voted":
+            broadcast_game_state()
+            emit('game_result', game_manager.last_round_result, broadcast=True)
+            
+            # Start timer for next round if game not over
+            if not game_manager.last_round_result.get('game_over'):
+                socketio.start_background_task(next_round_task)
+    return {'success': success, 'message': msg}
+
+def next_round_task():
+    socketio.sleep(8) # 8 seconds to view results
+    if game_manager.state == GameState.RESULT:
+        game_manager.state = GameState.CHAT
+        game_manager.round += 1
+        game_manager.chat_history = []
+        game_manager.votes = {}
+        broadcast_game_state()
+        socketio.start_background_task(chat_timer_task)
+
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5000)
