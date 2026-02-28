@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Global aesthetic settings can be inserted here */
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-brand-500: #6366f1;
+  /* Example primary color */
+}
+
+body {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
