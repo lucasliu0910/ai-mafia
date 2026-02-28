@@ -56,7 +56,9 @@ def handle_join(data):
 
 @socketio.on('start_game')
 def handle_start():
-    success, msg = game_manager.start_game()
+    from ai_agent import ai_agent
+    ai_agent.reset_identity() # random name in case of new game loop
+    success, msg = game_manager.start_game(ai_agent.ai_name)
     if success:
         broadcast_game_state()
     return {'success': success, 'message': msg}
