@@ -13,17 +13,17 @@
 
 ## Phase 2: Turn-Based Chat System (Backend)
 
-- [ ] Task: Write tests for turn order generation in GameManager
-- [ ] Task: Implement turn order logic — generate randomized speaking order for each chat round among living players (including AI)
-- [ ] Task: Write tests for turn timer and turn advancement
-- [ ] Task: Implement turn management — 20-second timer per turn, advance to next player on message or timeout
-- [ ] Task: Write tests for message restriction to active turn player
-- [ ] Task: Implement send_message restriction — only the active turn player can send a message
-- [ ] Task: Write tests for AI turn response generation within turn system
-- [ ] Task: Implement AI turn participation — when it is the AI's turn, generate response with simulated typing delay (2-5s) within the 20-second window
-- [ ] Task: Write tests for chat phase completion (all turns done → transition to VOTING)
-- [ ] Task: Implement chat phase completion — after all living players have had a turn, transition game state to VOTING
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Turn-Based Chat System' (Protocol in workflow.md)
+- [x] Task: Write tests for turn order generation in GameManager fd44053
+- [x] Task: Implement turn order logic — generate randomized speaking order for each chat round among living players (including AI) fd44053
+- [x] Task: Write tests for turn timer and turn advancement fd44053
+- [x] Task: Implement turn management — 20-second timer per turn, advance to next player on message or timeout fd44053
+- [x] Task: Write tests for message restriction to active turn player fd44053
+- [x] Task: Implement send_message restriction — only the active turn player can send a message fd44053
+- [x] Task: Write tests for AI turn response generation within turn system fd44053
+- [x] Task: Implement AI turn participation — when it is the AI's turn, generate response with simulated typing delay (2-5s) within the 20-second window fd44053
+- [x] Task: Write tests for chat phase completion (all turns done → transition to VOTING) fd44053
+- [x] Task: Implement chat phase completion — after all living players have had a turn, transition game state to VOTING fd44053
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Turn-Based Chat System' (Protocol in workflow.md)
 
 ## Phase 3: Turn-Based Chat System (Frontend)
 

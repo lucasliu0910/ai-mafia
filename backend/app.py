@@ -19,53 +19,108 @@ CORS(app)
 # Initialize SocketIO with aggressive CORS to allow 127.0.0.1 and localhost
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-ai_is_typing = False
 
 def broadcast_game_state():
     """Helper to broadcast the current game state to all clients."""
     state_data = {
         'state': game_manager.state,
         'players': game_manager.get_player_list(),
-        'round': game_manager.round
+        'round': game_manager.round,
+        'current_turn': game_manager.get_current_turn_sid(),
     }
     socketio.emit('game_update', state_data)
 
-def ai_respond_task():
-    global ai_is_typing
-    if ai_is_typing or game_manager.state != GameState.CHAT:
-        return
-    ai_is_typing = True
-    socketio.sleep(random.uniform(3, 6)) # simulate typing delay
-    
+
+def broadcast_turn_update():
+    """Broadcast the current turn info to all clients."""
+    current_sid = game_manager.get_current_turn_sid()
+    current_player = game_manager.players.get(current_sid, {})
+    socketio.emit('turn_update', {
+        'current_turn_sid': current_sid,
+        'current_turn_name': current_player.get('name', ''),
+        'time_left': 20,
+    })
+
+
+def ai_turn_task():
+    """Handle AI's turn: simulate typing delay, then send a response."""
     if game_manager.state != GameState.CHAT:
-        ai_is_typing = False
         return
-        
+    current_sid = game_manager.get_current_turn_sid()
+    if current_sid != game_manager.ai_sid:
+        return
+
+    socketio.sleep(random.uniform(2, 5))  # simulate typing delay
+
+    if game_manager.state != GameState.CHAT:
+        return
+
     from ai_agent import ai_agent
     reply = ai_agent.generate_chat_response(game_manager.chat_history)
-    
+
     msg_obj = {'sender': ai_agent.ai_name, 'text': reply}
     game_manager.chat_history.append(msg_obj)
     socketio.emit('receive_message', msg_obj)
-    ai_is_typing = False
 
-def chat_timer_task():
-    time_left = 60
-    # First AI message
-    socketio.start_background_task(ai_respond_task)
-    
-    while time_left > 0 and game_manager.state == GameState.CHAT:
-        socketio.emit('timer_update', {'time_left': time_left})
-        socketio.sleep(1)
-        time_left -= 1
-        
-    if game_manager.state == GameState.CHAT and time_left <= 0:
-        game_manager.state = GameState.VOTING
+    # Advance turn after AI sends message
+    game_manager.advance_turn()
+    if game_manager.all_turns_complete():
+        game_manager.check_chat_phase_complete()
         broadcast_game_state()
+    else:
+        broadcast_turn_update()
+        # If next turn is also AI (shouldn't happen), handle it
+        if game_manager.get_current_turn_sid() == game_manager.ai_sid:
+            socketio.start_background_task(ai_turn_task)
+
+
+def turn_timer_task():
+    """Run the 20-second timer for the current turn."""
+    while game_manager.state == GameState.CHAT and not game_manager.all_turns_complete():
+        current_sid = game_manager.get_current_turn_sid()
+        if current_sid is None:
+            break
+
+        # If it's the AI's turn, let the AI task handle it
+        if current_sid == game_manager.ai_sid:
+            socketio.start_background_task(ai_turn_task)
+            # Wait for AI to finish its turn
+            while (game_manager.state == GameState.CHAT and
+                   game_manager.get_current_turn_sid() == game_manager.ai_sid):
+                socketio.sleep(0.5)
+            continue
+
+        # Human player's turn: 20-second countdown
+        time_left = 20
+        turn_sid_at_start = game_manager.get_current_turn_sid()
+        while time_left > 0 and game_manager.state == GameState.CHAT:
+            # Check if turn was already advanced (player sent a message)
+            if game_manager.get_current_turn_sid() != turn_sid_at_start:
+                break
+            socketio.emit('timer_update', {'time_left': time_left, 'current_turn_sid': turn_sid_at_start})
+            socketio.sleep(1)
+            time_left -= 1
+
+        # If the player didn't send a message, timeout and advance
+        if (game_manager.state == GameState.CHAT and
+                game_manager.get_current_turn_sid() == turn_sid_at_start):
+            game_manager.advance_turn()
+            if game_manager.all_turns_complete():
+                game_manager.check_chat_phase_complete()
+                broadcast_game_state()
+            else:
+                broadcast_turn_update()
+
+    # If we exited the loop because all turns are complete
+    if game_manager.state == GameState.CHAT and game_manager.all_turns_complete():
+        game_manager.check_chat_phase_complete()
+        broadcast_game_state()
+
 
 @app.route('/')
 def index():
     return jsonify({"status": "AI Mafia backend is running!"})
+
 
 @socketio.on('connect')
 def handle_connect():
@@ -73,8 +128,10 @@ def handle_connect():
     emit('game_update', {
         'state': game_manager.state,
         'players': game_manager.get_player_list(),
-        'round': game_manager.round
+        'round': game_manager.round,
+        'current_turn': game_manager.get_current_turn_sid(),
     })
+
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -82,74 +139,88 @@ def handle_disconnect():
     game_manager.remove_player(request.sid)
     broadcast_game_state()
 
+
 @socketio.on('join_game')
 def handle_join(data):
     name = data.get('name')
     if not name:
         return {'success': False, 'message': 'Name required.'}
-    
+
     success, msg = game_manager.add_player(request.sid, name)
     if success:
         broadcast_game_state()
     return {'success': success, 'message': msg}
 
+
 @socketio.on('start_game')
 def handle_start():
     from ai_agent import ai_agent
-    ai_agent.reset_identity() # random name for a new game
+    ai_agent.reset_identity()  # random name for a new game
     success, msg = game_manager.start_game(ai_agent.ai_name, requester_sid=request.sid)
     if success:
         broadcast_game_state()
-        socketio.start_background_task(chat_timer_task)
+        broadcast_turn_update()
+        socketio.start_background_task(turn_timer_task)
     return {'success': success, 'message': msg}
+
 
 @socketio.on('send_message')
 def handle_message(data):
     text = data.get('text')
     if game_manager.state != GameState.CHAT or not text:
         return
-        
+
+    # Only the active turn player can send a message
+    if not game_manager.can_send_message(request.sid):
+        return
+
     sender = game_manager.players.get(request.sid)
     if not sender:
         return
-        
+
     msg_obj = {'sender': sender['name'], 'text': text}
     game_manager.chat_history.append(msg_obj)
     emit('receive_message', msg_obj, broadcast=True)
-    
-    from ai_agent import ai_agent
-    mentioned = ai_agent.ai_name.lower() in text.lower()
-    
-    # AI responds if mentioned, or randomly (30% chance)
-    if mentioned or random.random() < 0.3:
-        socketio.start_background_task(ai_respond_task)
+
+    # Advance turn after message is sent
+    game_manager.advance_turn()
+    if game_manager.all_turns_complete():
+        game_manager.check_chat_phase_complete()
+        broadcast_game_state()
+    else:
+        broadcast_turn_update()
+
 
 @socketio.on('submit_vote')
 def handle_vote(data):
     target_name = data.get('target')
     if not target_name:
         return {'success': False, 'message': 'Target required.'}
-        
+
     success, msg = game_manager.submit_vote(request.sid, target_name)
     if success:
         if msg == "All_Voted":
             broadcast_game_state()
             emit('game_result', game_manager.last_round_result, broadcast=True)
-            
+
             # Start timer for next round if game not over
             if not game_manager.last_round_result.get('game_over'):
                 socketio.start_background_task(next_round_task)
     return {'success': success, 'message': msg}
 
+
 def next_round_task():
-    socketio.sleep(8) # 8 seconds to view results
+    socketio.sleep(8)  # 8 seconds to view results
     if game_manager.state == GameState.RESULT:
         game_manager.state = GameState.CHAT
         game_manager.round += 1
         game_manager.chat_history = []
         game_manager.votes = {}
+        game_manager._generate_turn_order()
         broadcast_game_state()
-        socketio.start_background_task(chat_timer_task)
+        broadcast_turn_update()
+        socketio.start_background_task(turn_timer_task)
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5000)
