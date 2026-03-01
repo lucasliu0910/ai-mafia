@@ -3,7 +3,7 @@
 ## Phase 1: Host System (Backend + Frontend)
 
 - [x] Task: Write tests for host assignment logic in GameManager 958214d
-- [ ] Task: Implement host system in GameManager — first player to join becomes host, host transfers on disconnect
+- [x] Task: Implement host system in GameManager — first player to join becomes host, host transfers on disconnect 5467030
 - [ ] Task: Write tests for host-only game start permission
 - [ ] Task: Implement host-only start_game restriction in app.py
 - [ ] Task: Write tests for host indicator in player list data
