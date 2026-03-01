@@ -58,11 +58,11 @@ function App() {
     }
   }, [])
 
-  const handleJoin = (name) => {
-    socket.emit('join_game', { name }, (response) => {
+  const handleJoin = () => {
+    socket.emit('join_game', {}, (response) => {
       if (response && response.success) {
         setJoined(true)
-        setPlayerName(name)
+        setPlayerName(response.nickname || '')
         setJoinError('')
         if (response.spectator) {
           setIsSpectator(true)
@@ -99,6 +99,12 @@ function App() {
           {backendStatus}
         </div>
       </div>
+
+      {joined && playerName && (
+        <div data-testid="nickname-banner" className="relative z-10 mb-3 px-4 py-2 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-indigo-300 text-sm font-semibold tracking-wide">
+          Your nickname is {playerName}
+        </div>
+      )}
 
       <div className={`relative z-10 w-full transition-all duration-500 ${isChat || isSpectating ? 'max-w-xl p-0 shadow-[0_0_40px_rgba(0,0,0,0.5)]' : 'max-w-md px-8 py-10 shadow-2xl'} bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/50 overflow-hidden`}>
         {!joined ? (

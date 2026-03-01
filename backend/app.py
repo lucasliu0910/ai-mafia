@@ -144,21 +144,21 @@ def handle_disconnect():
 
 
 @socketio.on('join_game')
-def handle_join(data):
-    name = data.get('name')
-    if not name:
-        return {'success': False, 'message': 'Name required.'}
-
+def handle_join(data=None):
     # If game is in progress, join as spectator
     if game_manager.state != GameState.LOBBY:
-        success, msg = game_manager.add_spectator(request.sid, name)
+        success, msg = game_manager.add_spectator(request.sid)
         if success:
+            nickname = game_manager.spectators[request.sid]['name']
             broadcast_game_state()
+            return {'success': success, 'message': msg, 'spectator': True, 'nickname': nickname}
         return {'success': success, 'message': msg, 'spectator': True}
 
-    success, msg = game_manager.add_player(request.sid, name)
+    success, msg = game_manager.add_player(request.sid)
     if success:
+        nickname = game_manager.players[request.sid]['name']
         broadcast_game_state()
+        return {'success': success, 'message': msg, 'nickname': nickname}
     return {'success': success, 'message': msg}
 
 
