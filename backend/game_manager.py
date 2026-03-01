@@ -50,7 +50,7 @@ class GameManager:
                 break
 
     def get_player_list(self):
-        return [{'sid': sid, 'name': p['name'], 'eliminated': p.get('eliminated', False), 'is_ai': p.get('is_ai', False)} for sid, p in self.players.items()]
+        return [{'sid': sid, 'name': p['name'], 'eliminated': p.get('eliminated', False), 'is_ai': p.get('is_ai', False), 'is_host': p.get('is_host', False)} for sid, p in self.players.items()]
 
     def get_living_players(self):
         return [p for p in self.players.values() if not p.get('eliminated', False)]
