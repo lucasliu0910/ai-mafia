@@ -18,6 +18,8 @@ class GameManager:
         self.last_round_result = {}
         self.host_sid = None
         self._join_order = []  # track join order for host transfer
+        self.turn_order = []  # list of sids in speaking order
+        self.current_turn_index = 0
         
     def add_player(self, sid, name):
         if self.state != GameState.LOBBY:
@@ -76,7 +78,44 @@ class GameManager:
         self.chat_history = []
         self.votes = {}
         self.last_round_result = {}
+        self._generate_turn_order()
         return True, "Game started."
+
+    def _generate_turn_order(self):
+        """Generate a randomized speaking order for the current round."""
+        living_sids = [sid for sid, p in self.players.items()
+                       if not p.get('eliminated', False)]
+        random.shuffle(living_sids)
+        self.turn_order = living_sids
+        self.current_turn_index = 0
+
+    def get_current_turn_sid(self):
+        """Return the sid of the player whose turn it is."""
+        if self.current_turn_index >= len(self.turn_order):
+            return None
+        return self.turn_order[self.current_turn_index]
+
+    def advance_turn(self):
+        """Advance to the next turn. Returns the next player's sid, or None if all turns are done."""
+        self.current_turn_index += 1
+        if self.current_turn_index >= len(self.turn_order):
+            return None
+        return self.turn_order[self.current_turn_index]
+
+    def all_turns_complete(self):
+        """Check if all players have had their turn."""
+        return self.current_turn_index >= len(self.turn_order)
+
+    def can_send_message(self, sid):
+        """Check if the given sid is the active turn player."""
+        if self.state != GameState.CHAT:
+            return False
+        return sid == self.get_current_turn_sid()
+
+    def check_chat_phase_complete(self):
+        """Transition to VOTING if all turns are complete."""
+        if self.all_turns_complete():
+            self.state = GameState.VOTING
 
     def submit_vote(self, sid, target_name):
         if self.state != GameState.VOTING:
