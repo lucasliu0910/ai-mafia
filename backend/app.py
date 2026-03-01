@@ -252,4 +252,9 @@ def next_round_task():
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5000)
+    socketio.run(
+        app,
+        host=os.getenv('FLASK_HOST', '127.0.0.1'),
+        port=int(os.getenv('FLASK_PORT', '5000')),
+        debug=os.getenv('FLASK_DEBUG', 'true').lower() == 'true'
+    )

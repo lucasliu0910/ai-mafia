@@ -35,12 +35,12 @@
 - [x] Task: Implement spectator-to-player conversion on restart — move opted-in spectators to players dict, keep others as spectators
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Game Restart (Backend)' (Protocol in workflow.md)
 
-## Phase 4: Game Restart (Frontend)
+## Phase 4: Game Restart (Frontend) ✅ `2304e3c`
 
-- [ ] Task: Write tests for host-only "Play Again" button on ResultScreen
-- [ ] Task: Update ResultScreen — show "Play Again" button only to host, show "Waiting for the host to restart..." to others
-- [ ] Task: Write tests for spectator opt-in UI on game over
-- [ ] Task: Add spectator opt-in prompt to SpectatorView — show "Join" and "Stay Spectating" buttons when game_over is true, emit spectator_opt_in event
-- [ ] Task: Write tests for frontend state reset on restart (clear messages, votes, results, turn data, spectator flag)
-- [ ] Task: Implement frontend reset — listen for game_update with LOBBY state after restart, clear all local state, update displayed nickname
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Game Restart (Frontend)' (Protocol in workflow.md)
+- [x] Task: Write tests for host-only "Play Again" button on ResultScreen
+- [x] Task: Update ResultScreen — show "Play Again" button only to host, show "Waiting for the host to restart..." to others
+- [x] Task: Write tests for spectator opt-in UI on game over
+- [x] Task: Add spectator opt-in prompt to SpectatorView — show "Join" and "Stay Spectating" buttons when game_over is true, emit spectator_opt_in event
+- [x] Task: Write tests for frontend state reset on restart (clear messages, votes, results, turn data, spectator flag)
+- [x] Task: Implement frontend reset — listen for game_update with LOBBY state after restart, clear all local state, update displayed nickname
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Game Restart (Frontend)' (Protocol in workflow.md)

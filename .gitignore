@@ -1,7 +1,7 @@
 # Node
 node_modules/
 .npm
-package-lock.json
+# package-lock.json is committed for reproducible Docker builds
 
 # Python
 __pycache__/

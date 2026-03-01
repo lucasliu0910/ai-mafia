@@ -10,6 +10,6 @@ _Link: [./conductor/tracks/game_mechanics_refactor_20260228/](./conductor/tracks
 
 ---
 
-## [~] Track: Game replay with auto-nickname system
+## [x] Track: Game replay with auto-nickname system
 
 _Link: [./conductor/tracks/game_replay_nickname_20260228/](./conductor/tracks/game_replay_nickname_20260228/)_

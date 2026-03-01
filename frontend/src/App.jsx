@@ -7,7 +7,7 @@ import VotingScreen from './components/VotingScreen'
 import ResultScreen from './components/ResultScreen'
 import SpectatorView from './components/SpectatorView'
 
-const socket = io('http://127.0.0.1:5000')
+const socket = io(import.meta.env.VITE_BACKEND_URL || '')
 
 function App() {
   const [gameState, setGameState] = useState('LOBBY') // LOBBY, CHAT, VOTING, RESULT
