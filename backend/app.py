@@ -3,6 +3,7 @@ import random
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 from game_manager import game_manager, GameState
 
@@ -12,8 +13,11 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'ai_mafia_secret')
 
-# Initialize SocketIO with CORS allowed for the frontend
-socketio = SocketIO(app, cors_allowed_origins="*")
+# Enable CORS for HTTP routes
+CORS(app)
+
+# Initialize SocketIO with aggressive CORS to allow 127.0.0.1 and localhost
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 ai_is_typing = False
 

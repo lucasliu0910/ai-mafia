@@ -6,7 +6,7 @@ import ChatScreen from './components/ChatScreen'
 import VotingScreen from './components/VotingScreen'
 import ResultScreen from './components/ResultScreen'
 
-const socket = io('http://localhost:5000')
+const socket = io('http://127.0.0.1:5000')
 
 function App() {
   const [gameState, setGameState] = useState('LOBBY') // LOBBY, CHAT, VOTING, RESULT
