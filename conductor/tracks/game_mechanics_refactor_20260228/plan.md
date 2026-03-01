@@ -5,7 +5,7 @@
 - [x] Task: Write tests for host assignment logic in GameManager 958214d
 - [x] Task: Implement host system in GameManager — first player to join becomes host, host transfers on disconnect 5467030
 - [x] Task: Write tests for host-only game start permission 2271a9d
-- [ ] Task: Implement host-only start_game restriction in app.py
+- [x] Task: Implement host-only start_game restriction in app.py 89f2653
 - [ ] Task: Write tests for host indicator in player list data
 - [ ] Task: Update get_player_list to include is_host flag and emit host info to clients
 - [ ] Task: Update LobbyScreen component to show host badge and restrict Start Game button to host only
