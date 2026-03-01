@@ -58,12 +58,12 @@
 - [x] Task: Update broadcast_game_state to include spectator list and count
 - [x] Task: Conductor - User Manual Verification 'Phase 5: Spectator Mode (Backend)' (Protocol in workflow.md)
 
-## Phase 6: Spectator Mode (Frontend)
+## Phase 6: Spectator Mode (Frontend) [checkpoint: pending]
 
-- [ ] Task: Write tests for spectator view component rendering
-- [ ] Task: Create SpectatorView component — read-only chat display with "Spectating" badge, no input field or vote buttons
-- [ ] Task: Write tests for App.jsx spectator routing logic
-- [ ] Task: Update App.jsx to route eliminated players and late joiners to SpectatorView
-- [ ] Task: Write tests for spectator count display in game UI
-- [ ] Task: Add spectator count indicator visible to all players and spectators
-- [ ] Task: Conductor - User Manual Verification 'Phase 6: Spectator Mode (Frontend)' (Protocol in workflow.md)
+- [x] Task: Write tests for spectator view component rendering
+- [x] Task: Create SpectatorView component — read-only chat display with "Spectating" badge, no input field or vote buttons
+- [x] Task: Write tests for App.jsx spectator routing logic
+- [x] Task: Update App.jsx to route eliminated players and late joiners to SpectatorView
+- [x] Task: Write tests for spectator count display in game UI
+- [x] Task: Add spectator count indicator visible to all players and spectators
+- [x] Task: Conductor - User Manual Verification 'Phase 6: Spectator Mode (Frontend)' (Protocol in workflow.md)

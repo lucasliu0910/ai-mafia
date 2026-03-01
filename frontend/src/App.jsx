@@ -5,6 +5,7 @@ import LobbyScreen from './components/LobbyScreen'
 import ChatScreen from './components/ChatScreen'
 import VotingScreen from './components/VotingScreen'
 import ResultScreen from './components/ResultScreen'
+import SpectatorView from './components/SpectatorView'
 
 const socket = io('http://127.0.0.1:5000')
 
@@ -19,6 +20,8 @@ function App() {
   const [currentTurnSid, setCurrentTurnSid] = useState(null)
   const [currentTurnName, setCurrentTurnName] = useState('')
   const [timeLeft, setTimeLeft] = useState(20)
+  const [isSpectator, setIsSpectator] = useState(false)
+  const [spectators, setSpectators] = useState([])
 
   useEffect(() => {
     socket.on('connect', () => setBackendStatus('Connected'))
@@ -27,6 +30,7 @@ function App() {
     socket.on('game_update', (data) => {
       setGameState(data.state)
       setPlayers(data.players)
+      if (data.spectators) setSpectators(data.spectators)
     })
 
     socket.on('game_result', (resultData) => {
@@ -60,6 +64,9 @@ function App() {
         setJoined(true)
         setPlayerName(name)
         setJoinError('')
+        if (response.spectator) {
+          setIsSpectator(true)
+        }
       } else {
         setJoinError(response?.message || 'Failed to join')
       }
@@ -75,6 +82,7 @@ function App() {
   }
 
   const isChat = gameState === 'CHAT';
+  const isSpectating = isSpectator || (joined && players.find(p => p.name === playerName)?.eliminated);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-slate-100 p-4 font-sans">
@@ -92,9 +100,11 @@ function App() {
         </div>
       </div>
 
-      <div className={`relative z-10 w-full transition-all duration-500 ${isChat ? 'max-w-xl p-0 shadow-[0_0_40px_rgba(0,0,0,0.5)]' : 'max-w-md px-8 py-10 shadow-2xl'} bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/50 overflow-hidden`}>
+      <div className={`relative z-10 w-full transition-all duration-500 ${isChat || isSpectating ? 'max-w-xl p-0 shadow-[0_0_40px_rgba(0,0,0,0.5)]' : 'max-w-md px-8 py-10 shadow-2xl'} bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-slate-700/50 overflow-hidden`}>
         {!joined ? (
           <JoinScreen onJoin={handleJoin} joinError={joinError} />
+        ) : isSpectating && gameState !== 'LOBBY' ? (
+          <SpectatorView socket={socket} spectatorCount={spectators.length} />
         ) : gameState === 'LOBBY' ? (
           <LobbyScreen players={players} onStartGame={handleStartGame} playerName={playerName} />
         ) : gameState === 'CHAT' ? (
