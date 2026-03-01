@@ -28,9 +28,29 @@ function App() {
     socket.on('disconnect', () => setBackendStatus('Disconnected'))
 
     socket.on('game_update', (data) => {
+      const prevState = gameState
       setGameState(data.state)
       setPlayers(data.players)
       if (data.spectators) setSpectators(data.spectators)
+      // Reset local state when returning to LOBBY (restart)
+      if (data.state === 'LOBBY') {
+        setLastResult(null)
+        setCurrentTurnSid(null)
+        setCurrentTurnName('')
+        setTimeLeft(20)
+        // If this client was a spectator who opted in, they're now a player
+        const isNowPlayer = data.players.some(p => p.sid === socket.id)
+        if (isNowPlayer) {
+          setIsSpectator(false)
+        }
+      }
+    })
+
+    socket.on('nickname_update', (nicknameMap) => {
+      const myNickname = nicknameMap[socket.id]
+      if (myNickname) {
+        setPlayerName(myNickname)
+      }
     })
 
     socket.on('game_result', (resultData) => {
@@ -55,6 +75,7 @@ function App() {
       socket.off('game_result')
       socket.off('turn_update')
       socket.off('timer_update')
+      socket.off('nickname_update')
     }
   }, [])
 
@@ -81,8 +102,18 @@ function App() {
     })
   }
 
+  const handlePlayAgain = () => {
+    socket.emit('restart_game', (response) => {
+      if (response && !response.success) {
+        alert(response.message)
+      }
+    })
+  }
+
   const isChat = gameState === 'CHAT';
   const isSpectating = isSpectator || (joined && players.find(p => p.name === playerName)?.eliminated);
+  const isHost = joined && players.find(p => p.sid === socket.id)?.is_host;
+  const isGameOver = lastResult?.game_over === true;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-slate-100 p-4 font-sans">
@@ -110,7 +141,7 @@ function App() {
         {!joined ? (
           <JoinScreen onJoin={handleJoin} joinError={joinError} />
         ) : isSpectating && gameState !== 'LOBBY' ? (
-          <SpectatorView socket={socket} spectatorCount={spectators.length} />
+          <SpectatorView socket={socket} spectatorCount={spectators.length} gameOver={isGameOver} />
         ) : gameState === 'LOBBY' ? (
           <LobbyScreen players={players} onStartGame={handleStartGame} playerName={playerName} />
         ) : gameState === 'CHAT' ? (
@@ -125,7 +156,7 @@ function App() {
         ) : gameState === 'VOTING' ? (
           <VotingScreen socket={socket} players={players} playerName={playerName} />
         ) : gameState === 'RESULT' ? (
-          <ResultScreen result={lastResult} />
+          <ResultScreen result={lastResult} isHost={isHost} onPlayAgain={handlePlayAgain} />
         ) : (
           <div className="text-center p-8">
             <h2 className="text-3xl font-bold text-slate-300 animate-pulse">

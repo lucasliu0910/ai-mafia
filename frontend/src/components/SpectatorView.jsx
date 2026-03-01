@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function SpectatorView({ socket, spectatorCount }) {
+export default function SpectatorView({ socket, spectatorCount, gameOver }) {
     const [messages, setMessages] = useState([]);
+    const [optInChoice, setOptInChoice] = useState(null);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -19,6 +20,11 @@ export default function SpectatorView({ socket, spectatorCount }) {
             socket.off('receive_message', onMessage);
         };
     }, [socket]);
+
+    const handleOptIn = (wantsToJoin) => {
+        socket.emit('spectator_opt_in', { opt_in: wantsToJoin }, () => {});
+        setOptInChoice(wantsToJoin);
+    };
 
     return (
         <div className="flex flex-col h-[500px] w-full mx-auto bg-slate-900 overflow-hidden">
@@ -54,9 +60,33 @@ export default function SpectatorView({ socket, spectatorCount }) {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* No input area - spectators are read-only */}
+            {/* Footer */}
             <div className="p-4 bg-slate-900 border-t border-slate-700 text-center">
-                <p className="text-slate-500 text-sm italic">You are spectating. Chat and voting are disabled.</p>
+                {gameOver && optInChoice === null ? (
+                    <div className="flex flex-col gap-3">
+                        <p className="text-slate-300 text-sm font-semibold">Join the next game?</p>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => handleOptIn(true)}
+                                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all text-sm"
+                            >
+                                Join
+                            </button>
+                            <button
+                                onClick={() => handleOptIn(false)}
+                                className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-xl transition-all text-sm"
+                            >
+                                Stay Spectating
+                            </button>
+                        </div>
+                    </div>
+                ) : gameOver && optInChoice !== null ? (
+                    <p className="text-indigo-400 text-sm font-semibold">
+                        {optInChoice ? 'Joining next game...' : 'Staying as spectator.'}
+                    </p>
+                ) : (
+                    <p className="text-slate-500 text-sm italic">You are spectating. Chat and voting are disabled.</p>
+                )}
             </div>
         </div>
     );

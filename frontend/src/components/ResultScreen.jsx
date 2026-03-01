@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-export default function ResultScreen({ result }) {
+export default function ResultScreen({ result, isHost, onPlayAgain }) {
     const [countdown, setCountdown] = useState(8);
 
     useEffect(() => {
@@ -55,12 +55,16 @@ export default function ResultScreen({ result }) {
                             ? `You successfully eliminated the AI! Great job.`
                             : `The AI survived and infiltrated your group.`}
                     </p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-sm rounded-2xl transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] active:scale-95 border border-slate-600/50"
-                    >
-                        Play Again
-                    </button>
+                    {isHost ? (
+                        <button
+                            onClick={onPlayAgain}
+                            className="px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white font-black uppercase tracking-widest text-sm rounded-2xl transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] active:scale-95 border border-slate-600/50"
+                        >
+                            Play Again
+                        </button>
+                    ) : (
+                        <p className="text-slate-400 font-medium text-sm">Waiting for the host to restart...</p>
+                    )}
                 </div>
             ) : (
                 <div className="mt-8 flex flex-col items-center">
