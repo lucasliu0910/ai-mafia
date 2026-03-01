@@ -16,6 +16,9 @@ function App() {
   const [joinError, setJoinError] = useState('')
   const [backendStatus, setBackendStatus] = useState('Checking backend...')
   const [lastResult, setLastResult] = useState(null)
+  const [currentTurnSid, setCurrentTurnSid] = useState(null)
+  const [currentTurnName, setCurrentTurnName] = useState('')
+  const [timeLeft, setTimeLeft] = useState(20)
 
   useEffect(() => {
     socket.on('connect', () => setBackendStatus('Connected'))
@@ -30,11 +33,24 @@ function App() {
       setLastResult(resultData)
     })
 
+    socket.on('turn_update', (data) => {
+      setCurrentTurnSid(data.current_turn_sid)
+      setCurrentTurnName(data.current_turn_name)
+      setTimeLeft(data.time_left)
+    })
+
+    socket.on('timer_update', (data) => {
+      setTimeLeft(data.time_left)
+      setCurrentTurnSid(data.current_turn_sid)
+    })
+
     return () => {
       socket.off('connect')
       socket.off('disconnect')
       socket.off('game_update')
       socket.off('game_result')
+      socket.off('turn_update')
+      socket.off('timer_update')
     }
   }, [])
 
@@ -82,7 +98,14 @@ function App() {
         ) : gameState === 'LOBBY' ? (
           <LobbyScreen players={players} onStartGame={handleStartGame} playerName={playerName} />
         ) : gameState === 'CHAT' ? (
-          <ChatScreen socket={socket} playerName={playerName} />
+          <ChatScreen
+            socket={socket}
+            playerName={playerName}
+            currentTurnName={currentTurnName}
+            currentTurnSid={currentTurnSid}
+            myTurn={socket.id === currentTurnSid}
+            timeLeft={timeLeft}
+          />
         ) : gameState === 'VOTING' ? (
           <VotingScreen socket={socket} players={players} playerName={playerName} />
         ) : gameState === 'RESULT' ? (
