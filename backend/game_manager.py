@@ -55,11 +55,13 @@ class GameManager:
     def get_living_players(self):
         return [p for p in self.players.values() if not p.get('eliminated', False)]
 
-    def start_game(self, ai_name):
+    def start_game(self, ai_name, requester_sid=None):
         if self.state != GameState.LOBBY:
             return False, "Game is not in LOBBY state."
-        if len(self.players) < 1:
-            return False, "Not enough players."
+        if requester_sid is None or requester_sid != self.host_sid:
+            return False, "Only the host can start the game."
+        if len(self.players) < 3:
+            return False, "Not enough players. Need at least 3."
             
         while any(p['name'] == ai_name for p in self.players.values()):
             ai_name += str(random.randint(1,9))

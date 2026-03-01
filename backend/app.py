@@ -97,7 +97,7 @@ def handle_join(data):
 def handle_start():
     from ai_agent import ai_agent
     ai_agent.reset_identity() # random name for a new game
-    success, msg = game_manager.start_game(ai_agent.ai_name)
+    success, msg = game_manager.start_game(ai_agent.ai_name, requester_sid=request.sid)
     if success:
         broadcast_game_state()
         socketio.start_background_task(chat_timer_task)
