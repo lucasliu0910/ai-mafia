@@ -1,0 +1,8 @@
+{
+  "track_id": "game_mechanics_refactor_20260228",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-28T12:00:00Z",
+  "updated_at": "2026-02-28T12:00:00Z",
+  "description": "Refactor game mechanics to match the product specification: turn-based chat (20s per player), updated win conditions (AI wins at 3 remaining players), host system (first player becomes host), and spectator mode (eliminated players and late joiners can watch but not participate)."
+}
