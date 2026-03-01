@@ -9,25 +9,45 @@ class GameState:
 class GameManager:
     def __init__(self):
         self.state = GameState.LOBBY
-        self.players = {}  # sid -> {'name': str, 'is_ai': bool, 'eliminated': bool}
+        self.players = {}  # sid -> {'name': str, 'is_ai': bool, 'eliminated': bool, 'is_host': bool}
         self.round = 0
         self.max_rounds = 3
-        self.chat_history = [] 
+        self.chat_history = []
         self.ai_sid = "ai_player_0"
         self.votes = {} # sid -> target_name
         self.last_round_result = {}
+        self.host_sid = None
+        self._join_order = []  # track join order for host transfer
         
     def add_player(self, sid, name):
         if self.state != GameState.LOBBY:
             return False, "Game already started."
         if any(p['name'] == name for p in self.players.values()):
             return False, "Name already taken."
-        self.players[sid] = {'name': name, 'is_ai': False, 'eliminated': False}
+        is_host = self.host_sid is None
+        self.players[sid] = {'name': name, 'is_ai': False, 'eliminated': False, 'is_host': is_host}
+        self._join_order.append(sid)
+        if is_host:
+            self.host_sid = sid
         return True, "Player joined."
 
     def remove_player(self, sid):
         if sid in self.players:
+            was_host = self.players[sid].get('is_host', False)
             del self.players[sid]
+            if sid in self._join_order:
+                self._join_order.remove(sid)
+            if was_host:
+                self._transfer_host()
+
+    def _transfer_host(self):
+        """Transfer host to the next player in join order."""
+        self.host_sid = None
+        for candidate_sid in self._join_order:
+            if candidate_sid in self.players:
+                self.host_sid = candidate_sid
+                self.players[candidate_sid]['is_host'] = True
+                break
 
     def get_player_list(self):
         return [{'sid': sid, 'name': p['name'], 'eliminated': p.get('eliminated', False), 'is_ai': p.get('is_ai', False)} for sid, p in self.players.items()]
