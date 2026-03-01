@@ -25,26 +25,26 @@
 - [x] Task: Implement chat phase completion — after all living players have had a turn, transition game state to VOTING fd44053
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Turn-Based Chat System' (Protocol in workflow.md) df46491
 
-## Phase 3: Turn-Based Chat System (Frontend)
+## Phase 3: Turn-Based Chat System (Frontend) [checkpoint: 6a2f708]
 
-- [ ] Task: Write tests for ChatScreen turn indicator display
-- [ ] Task: Refactor ChatScreen component — show active player indicator, 20-second countdown timer, and input field enabled only for the active player
-- [ ] Task: Write tests for chat input disabled state for non-active players
-- [ ] Task: Implement chat input restriction — disable text input and send button when it is not the player's turn
-- [ ] Task: Write tests for turn transition animations and timer display
-- [ ] Task: Add turn transition UI — animate turn changes, display "Your turn!" prompt, and pulsing timer countdown
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Turn-Based Chat System (Frontend)' (Protocol in workflow.md)
+- [x] Task: Write tests for ChatScreen turn indicator display 6a2f708
+- [x] Task: Refactor ChatScreen component — show active player indicator, 20-second countdown timer, and input field enabled only for the active player 6a2f708
+- [x] Task: Write tests for chat input disabled state for non-active players 6a2f708
+- [x] Task: Implement chat input restriction — disable text input and send button when it is not the player's turn 6a2f708
+- [x] Task: Write tests for turn transition animations and timer display 6a2f708
+- [x] Task: Add turn transition UI — animate turn changes, display "Your turn!" prompt, and pulsing timer countdown 6a2f708
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Turn-Based Chat System (Frontend)' (Protocol in workflow.md) 6a2f708
 
-## Phase 4: Updated Win Conditions (Backend)
+## Phase 4: Updated Win Conditions (Backend) [checkpoint: pending]
 
-- [ ] Task: Write tests for human win condition (most-voted player is AI)
-- [ ] Task: Implement human win condition — if the eliminated player is AI, set game_over and human_won
-- [ ] Task: Write tests for AI win condition (3 players remaining including AI)
-- [ ] Task: Implement AI win condition — after elimination, if only 3 players remain (including AI), AI wins
-- [ ] Task: Write tests for tie vote handling
-- [ ] Task: Implement tie vote resolution — random elimination among tied players
-- [ ] Task: Remove max_rounds hard limit from GameManager
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Updated Win Conditions' (Protocol in workflow.md)
+- [x] Task: Write tests for human win condition (most-voted player is AI)
+- [x] Task: Implement human win condition — if the eliminated player is AI, set game_over and human_won
+- [x] Task: Write tests for AI win condition (3 players remaining including AI)
+- [x] Task: Implement AI win condition — after elimination, if only 3 players remain (including AI), AI wins
+- [x] Task: Write tests for tie vote handling
+- [x] Task: Implement tie vote resolution — random elimination among tied players
+- [x] Task: Remove max_rounds hard limit from GameManager
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Updated Win Conditions' (Protocol in workflow.md)
 
 ## Phase 5: Spectator Mode (Backend)
 

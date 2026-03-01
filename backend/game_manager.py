@@ -11,7 +11,6 @@ class GameManager:
         self.state = GameState.LOBBY
         self.players = {}  # sid -> {'name': str, 'is_ai': bool, 'eliminated': bool, 'is_host': bool}
         self.round = 0
-        self.max_rounds = 3
         self.chat_history = []
         self.ai_sid = "ai_player_0"
         self.votes = {} # sid -> target_name
@@ -150,16 +149,18 @@ class GameManager:
         vote_counts = {}
         for target in self.votes.values():
             vote_counts[target] = vote_counts.get(target, 0) + 1
-            
+
         if not vote_counts:
             eliminated_name = None
         else:
             sorted_votes = sorted(vote_counts.items(), key=lambda x: x[1], reverse=True)
-            eliminated_name = sorted_votes[0][0]
-            
+            max_votes = sorted_votes[0][1]
+            tied = [name for name, count in sorted_votes if count == max_votes]
+            eliminated_name = random.choice(tied)
+
         human_won = False
         game_over = False
-        
+
         if eliminated_name:
             for sid, p in self.players.items():
                 if p['name'] == eliminated_name:
@@ -168,7 +169,7 @@ class GameManager:
                         human_won = True
                         game_over = True
                     break
-        
+
         self.last_round_result = {
             'votes': vote_counts,
             'eliminated': eliminated_name,
@@ -176,15 +177,15 @@ class GameManager:
             'human_won': human_won,
             'game_over': game_over
         }
-        
+
         if not game_over:
             living = self.get_living_players()
-            living_humans = [p for p in living if not p['is_ai']]
-            if self.round >= self.max_rounds or len(living_humans) <= 0:
+            ai_alive = any(p['is_ai'] for p in living)
+            if ai_alive and len(living) <= 3:
                 self.last_round_result['ai_won'] = True
                 self.last_round_result['game_over'] = True
                 self.last_round_result['human_won'] = False
-        
+
         self.state = GameState.RESULT
 
 game_manager = GameManager()
