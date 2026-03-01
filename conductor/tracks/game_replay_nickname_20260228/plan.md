@@ -1,0 +1,46 @@
+# Plan: Game Replay & Auto-Nickname System
+
+## Phase 1: Auto-Assigned Nicknames (Backend)
+
+- [ ] Task: Write tests for nickname list and random assignment in GameManager
+- [ ] Task: Implement nickname pool and assign_nickname method — maintain a list of ~30+ common English nicknames, randomly assign a unique one on player join
+- [ ] Task: Write tests for unique nickname enforcement among players and spectators
+- [ ] Task: Implement unique nickname validation — ensure no duplicate nicknames across players and spectators dicts
+- [ ] Task: Write tests for updated add_player accepting no name parameter
+- [ ] Task: Update add_player to auto-assign nickname when no name is provided
+- [ ] Task: Write tests for updated add_spectator auto-assigning nickname
+- [ ] Task: Update add_spectator to auto-assign nickname when no name is provided
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Auto-Assigned Nicknames (Backend)' (Protocol in workflow.md)
+
+## Phase 2: Auto-Assigned Nicknames (Frontend)
+
+- [ ] Task: Write tests for simplified JoinScreen with no name input
+- [ ] Task: Refactor JoinScreen — remove name input field, show only a "Join Game" button that emits join_game with no name
+- [ ] Task: Write tests for nickname display banner across all game states
+- [ ] Task: Add persistent "Your nickname is XXX" banner above the game container in App.jsx, visible in all states
+- [ ] Task: Update App.jsx handleJoin to receive and store the assigned nickname from the backend response
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Auto-Assigned Nicknames (Frontend)' (Protocol in workflow.md)
+
+## Phase 3: Game Restart (Backend)
+
+- [ ] Task: Write tests for restart_game event handler — host-only validation
+- [ ] Task: Implement restart_game Socket.IO handler — validate requester is host, reject non-host requests
+- [ ] Task: Write tests for game state reset logic (clear chat, votes, results, turn order, round, remove AI)
+- [ ] Task: Implement reset_game method in GameManager — clear all game data, remove AI player, reset round to 0, reset eliminated status
+- [ ] Task: Write tests for nickname re-assignment on restart
+- [ ] Task: Implement nickname re-randomization — assign new unique nicknames to all players on restart
+- [ ] Task: Write tests for spectator opt-in tracking (spectator_opt_in event)
+- [ ] Task: Implement spectator_opt_in Socket.IO handler — track which spectators want to join the next game
+- [ ] Task: Write tests for opted-in spectators becoming players on restart and non-opted spectators remaining
+- [ ] Task: Implement spectator-to-player conversion on restart — move opted-in spectators to players dict, keep others as spectators
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Game Restart (Backend)' (Protocol in workflow.md)
+
+## Phase 4: Game Restart (Frontend)
+
+- [ ] Task: Write tests for host-only "Play Again" button on ResultScreen
+- [ ] Task: Update ResultScreen — show "Play Again" button only to host, show "Waiting for the host to restart..." to others
+- [ ] Task: Write tests for spectator opt-in UI on game over
+- [ ] Task: Add spectator opt-in prompt to SpectatorView — show "Join" and "Stay Spectating" buttons when game_over is true, emit spectator_opt_in event
+- [ ] Task: Write tests for frontend state reset on restart (clear messages, votes, results, turn data, spectator flag)
+- [ ] Task: Implement frontend reset — listen for game_update with LOBBY state after restart, clear all local state, update displayed nickname
+- [ ] Task: Conductor - User Manual Verification 'Phase 4: Game Restart (Frontend)' (Protocol in workflow.md)

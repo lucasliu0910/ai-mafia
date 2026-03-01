@@ -1,0 +1,8 @@
+{
+  "track_id": "game_replay_nickname_20260228",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-28T23:20:00Z",
+  "updated_at": "2026-02-28T23:20:00Z",
+  "description": "Game replay with auto-nickname system — restart game after game over, auto-assign random nicknames"
+}

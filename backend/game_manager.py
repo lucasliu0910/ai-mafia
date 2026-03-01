@@ -1,5 +1,13 @@
 import random
 
+NICKNAME_POOL = [
+    'Sunny', 'Rocky', 'Pepper', 'Clover', 'Blaze', 'Maple', 'Storm',
+    'Coral', 'Dash', 'Echo', 'Frost', 'Ginger', 'Hazel', 'Ivy', 'Jet',
+    'Kiwi', 'Luna', 'Mango', 'Nova', 'Olive', 'Pebble', 'Quinn', 'Raven',
+    'Sage', 'Tiger', 'Uma', 'Viper', 'Willow', 'Ziggy', 'Amber', 'Birch',
+    'Cedar', 'Dusk', 'Ember', 'Flint', 'Grove',
+]
+
 class GameState:
     LOBBY = 'LOBBY'
     CHAT = 'CHAT'
@@ -20,10 +28,30 @@ class GameManager:
         self.turn_order = []  # list of sids in speaking order
         self.current_turn_index = 0
         self.spectators = {}  # sid -> {'name': str}
-        
-    def add_player(self, sid, name):
+
+    def _get_used_names(self):
+        """Return set of all names currently in use by players and spectators."""
+        names = {p['name'] for p in self.players.values()}
+        names.update(s['name'] for s in self.spectators.values())
+        return names
+
+    def assign_nickname(self):
+        """Assign a random unique nickname from the pool."""
+        used = self._get_used_names()
+        available = [n for n in NICKNAME_POOL if n not in used]
+        if not available:
+            # Fallback: generate a numbered name
+            i = 1
+            while f"Player{i}" in used:
+                i += 1
+            return f"Player{i}"
+        return random.choice(available)
+
+    def add_player(self, sid, name=None):
         if self.state != GameState.LOBBY:
             return False, "Game already started."
+        if name is None:
+            name = self.assign_nickname()
         if any(p['name'] == name for p in self.players.values()):
             return False, "Name already taken."
         is_host = self.host_sid is None
@@ -112,8 +140,10 @@ class GameManager:
             return False
         return sid == self.get_current_turn_sid()
 
-    def add_spectator(self, sid, name):
+    def add_spectator(self, sid, name=None):
         """Add a spectator (late joiner or eliminated player watching)."""
+        if name is None:
+            name = self.assign_nickname()
         self.spectators[sid] = {'name': name}
         return True, "Joined as spectator."
 
