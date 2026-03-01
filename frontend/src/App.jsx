@@ -80,7 +80,7 @@ function App() {
         {!joined ? (
           <JoinScreen onJoin={handleJoin} joinError={joinError} />
         ) : gameState === 'LOBBY' ? (
-          <LobbyScreen players={players} onStartGame={handleStartGame} />
+          <LobbyScreen players={players} onStartGame={handleStartGame} playerName={playerName} />
         ) : gameState === 'CHAT' ? (
           <ChatScreen socket={socket} playerName={playerName} />
         ) : gameState === 'VOTING' ? (
