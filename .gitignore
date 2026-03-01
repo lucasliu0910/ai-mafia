@@ -10,6 +10,9 @@ __pycache__/
 venv/
 .env
 
+# Secrets
+*.pem
+
 # OS
 .DS_Store
 

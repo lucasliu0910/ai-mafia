@@ -72,12 +72,17 @@ CHECK_ENV
         log "Setting up .env on server..."
         echo ""
         read -rp "Enter your OPENAI_API_KEY (or press Enter to skip): " OPENAI_KEY
+        read -rp "Enter your TUNNEL_TOKEN (or press Enter to skip): " CF_TUNNEL_TOKEN
         SECRET=$(openssl rand -hex 32)
 
         ssh ${SSH_OPTS} -i "${KEY_FILE}" "${REMOTE_USER}@${ip}" bash <<ENVSETUP
 cat > ${REMOTE_DIR}/.env <<EOF
-OPENAI_API_KEY=${OPENAI_KEY}
+FLASK_HOST=0.0.0.0
+FLASK_PORT=5000
+FLASK_DEBUG=false
 SECRET_KEY=${SECRET}
+OPENAI_API_KEY=${OPENAI_KEY}
+TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
 EOF
 chmod 600 ${REMOTE_DIR}/.env
 echo ".env created."
@@ -98,11 +103,10 @@ DEPLOY
     echo ""
     echo "========================================"
     echo "  Deployed successfully!"
-    echo "  Live at: http://${ip}"
     echo ""
-    echo "  DNS setup:"
-    echo "  Add an A record on your domain provider:"
-    echo "    your-domain.com  →  ${ip}"
+    echo "  HTTPS is handled by Cloudflare Tunnel."
+    echo "  Configure your tunnel in Cloudflare Zero Trust dashboard"
+    echo "  to point your domain to this server."
     echo "========================================"
 }
 
