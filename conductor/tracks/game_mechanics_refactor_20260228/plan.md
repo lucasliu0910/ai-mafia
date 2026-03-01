@@ -46,17 +46,17 @@
 - [x] Task: Remove max_rounds hard limit from GameManager
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Updated Win Conditions' (Protocol in workflow.md)
 
-## Phase 5: Spectator Mode (Backend)
+## Phase 5: Spectator Mode (Backend) [checkpoint: pending]
 
-- [ ] Task: Write tests for eliminated player spectator transition
-- [ ] Task: Implement spectator state for eliminated players — mark as spectator, exclude from turn order and voting
-- [ ] Task: Write tests for late joiner spectator assignment
-- [ ] Task: Implement late joiner spectator mode — players connecting after game start are assigned spectator role
-- [ ] Task: Write tests for spectator message and vote restriction
-- [ ] Task: Implement spectator restrictions — spectators cannot send messages or submit votes, but receive all chat and game state events
-- [ ] Task: Write tests for spectator count in game state broadcast
-- [ ] Task: Update broadcast_game_state to include spectator list and count
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Spectator Mode (Backend)' (Protocol in workflow.md)
+- [x] Task: Write tests for eliminated player spectator transition
+- [x] Task: Implement spectator state for eliminated players — mark as spectator, exclude from turn order and voting
+- [x] Task: Write tests for late joiner spectator assignment
+- [x] Task: Implement late joiner spectator mode — players connecting after game start are assigned spectator role
+- [x] Task: Write tests for spectator message and vote restriction
+- [x] Task: Implement spectator restrictions — spectators cannot send messages or submit votes, but receive all chat and game state events
+- [x] Task: Write tests for spectator count in game state broadcast
+- [x] Task: Update broadcast_game_state to include spectator list and count
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Spectator Mode (Backend)' (Protocol in workflow.md)
 
 ## Phase 6: Spectator Mode (Frontend)
 

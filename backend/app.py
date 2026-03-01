@@ -27,6 +27,7 @@ def broadcast_game_state():
         'players': game_manager.get_player_list(),
         'round': game_manager.round,
         'current_turn': game_manager.get_current_turn_sid(),
+        'spectators': game_manager.get_spectator_list(),
     }
     socketio.emit('game_update', state_data)
 
@@ -130,12 +131,14 @@ def handle_connect():
         'players': game_manager.get_player_list(),
         'round': game_manager.round,
         'current_turn': game_manager.get_current_turn_sid(),
+        'spectators': game_manager.get_spectator_list(),
     })
 
 
 @socketio.on('disconnect')
 def handle_disconnect():
     print(f"Client disconnected: {request.sid}")
+    game_manager.remove_spectator(request.sid)
     game_manager.remove_player(request.sid)
     broadcast_game_state()
 
@@ -145,6 +148,13 @@ def handle_join(data):
     name = data.get('name')
     if not name:
         return {'success': False, 'message': 'Name required.'}
+
+    # If game is in progress, join as spectator
+    if game_manager.state != GameState.LOBBY:
+        success, msg = game_manager.add_spectator(request.sid, name)
+        if success:
+            broadcast_game_state()
+        return {'success': success, 'message': msg, 'spectator': True}
 
     success, msg = game_manager.add_player(request.sid, name)
     if success:

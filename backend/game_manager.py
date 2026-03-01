@@ -19,6 +19,7 @@ class GameManager:
         self._join_order = []  # track join order for host transfer
         self.turn_order = []  # list of sids in speaking order
         self.current_turn_index = 0
+        self.spectators = {}  # sid -> {'name': str}
         
     def add_player(self, sid, name):
         if self.state != GameState.LOBBY:
@@ -110,6 +111,20 @@ class GameManager:
         if self.state != GameState.CHAT:
             return False
         return sid == self.get_current_turn_sid()
+
+    def add_spectator(self, sid, name):
+        """Add a spectator (late joiner or eliminated player watching)."""
+        self.spectators[sid] = {'name': name}
+        return True, "Joined as spectator."
+
+    def remove_spectator(self, sid):
+        """Remove a spectator on disconnect."""
+        if sid in self.spectators:
+            del self.spectators[sid]
+
+    def get_spectator_list(self):
+        """Return list of spectator info dicts."""
+        return [{'sid': sid, 'name': s['name']} for sid, s in self.spectators.items()]
 
     def check_chat_phase_complete(self):
         """Transition to VOTING if all turns are complete."""
