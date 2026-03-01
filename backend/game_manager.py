@@ -233,4 +233,67 @@ class GameManager:
 
         self.state = GameState.RESULT
 
+    def spectator_opt_in(self, sid, opt_in):
+        """Track a spectator's choice to join or stay spectating on restart."""
+        if sid not in self.spectators:
+            return False
+        self.spectators[sid]['opt_in'] = opt_in
+        return True
+
+    def reset_game(self, requester_sid=None):
+        """Reset the game back to LOBBY state. Only the host can do this."""
+        if self.state != GameState.RESULT:
+            return False, "Game is not in RESULT state."
+        if requester_sid is None or requester_sid != self.host_sid:
+            return False, "Only the host can restart the game."
+
+        # Remove AI player
+        if self.ai_sid in self.players:
+            del self.players[self.ai_sid]
+            if self.ai_sid in self._join_order:
+                self._join_order.remove(self.ai_sid)
+
+        # Move opted-in spectators to players
+        opted_in_sids = [sid for sid, s in self.spectators.items() if s.get('opt_in')]
+        for sid in opted_in_sids:
+            del self.spectators[sid]
+            self.players[sid] = {'name': '', 'is_ai': False, 'eliminated': False, 'is_host': False}
+            if sid not in self._join_order:
+                self._join_order.append(sid)
+
+        # Clear opt_in flags on remaining spectators
+        for s in self.spectators.values():
+            s.pop('opt_in', None)
+
+        # Re-assign nicknames to all players (clear names first to avoid conflicts)
+        for p in self.players.values():
+            p['name'] = ''
+        # Also clear spectator names temporarily for uniqueness check
+        old_spectator_names = {sid: s['name'] for sid, s in self.spectators.items()}
+        for s in self.spectators.values():
+            s['name'] = ''
+        # Assign new names to players
+        for sid in self.players:
+            self.players[sid]['name'] = self.assign_nickname()
+        # Re-assign spectator names
+        for sid in self.spectators:
+            self.spectators[sid]['name'] = self.assign_nickname()
+
+        # Reset game data
+        self.state = GameState.LOBBY
+        self.round = 0
+        self.chat_history = []
+        self.votes = {}
+        self.last_round_result = {}
+        self.turn_order = []
+        self.current_turn_index = 0
+
+        # Reset eliminated status and preserve host
+        for sid, p in self.players.items():
+            p['eliminated'] = False
+            p['is_host'] = (sid == self.host_sid)
+
+        return True, "Game reset."
+
+
 game_manager = GameManager()

@@ -219,6 +219,25 @@ def handle_vote(data):
     return {'success': success, 'message': msg}
 
 
+@socketio.on('restart_game')
+def handle_restart():
+    success, msg = game_manager.reset_game(requester_sid=request.sid)
+    if success:
+        # Build nickname map so each client can update their displayed name
+        nickname_map = {sid: p['name'] for sid, p in game_manager.players.items()}
+        nickname_map.update({sid: s['name'] for sid, s in game_manager.spectators.items()})
+        broadcast_game_state()
+        socketio.emit('nickname_update', nickname_map)
+    return {'success': success, 'message': msg}
+
+
+@socketio.on('spectator_opt_in')
+def handle_spectator_opt_in(data):
+    opt_in = data.get('opt_in', False)
+    game_manager.spectator_opt_in(request.sid, opt_in)
+    return {'success': True}
+
+
 def next_round_task():
     socketio.sleep(8)  # 8 seconds to view results
     if game_manager.state == GameState.RESULT:
